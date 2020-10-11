@@ -1,12 +1,3 @@
-/**
-* hexo-tag-blog-card
-*
-* Copyright (c) 2020, hinastory, sat0ma014
-* Licensed under the MIT license.
-* Syntax:
-* {% blogCard <url> [rel:<rel> [target:<target>] [useHatena:<true/false>] %}
-**/
-
 'use strict';
 const util = require('hexo-util');
 const ogs = require('open-graph-scraper');
@@ -68,11 +59,11 @@ function getTagByOpenGraph(options){
       const ogp = result.data;
 
       const info = getInfo(options, ogp);
-      const contents = getContents(options, ogp);
-
+//      const contents = getContents(options, ogp);
+      const description = getDescription(options, ogp);
       const card = util.htmlTag('div', { class: 'hbc-card' }, info + contents);
       const link = util.htmlTag('a', { class: 'hbc-link', href: options.url, target: options.target, rel: options.rel }, card);
-      const linkWrap = util.htmlTag('div', { class: 'hbc-link-wrap' }, link);
+      const linkWrap = util.htmlTag('div', { class: 'hbc-link-wrap bc' }, link);
       const tag = util.htmlTag('div', { class: className }, linkWrap);
       return tag;
     })
@@ -80,24 +71,6 @@ function getTagByOpenGraph(options){
       console.log('error:', error);
       return '';
     });
-}
-
-function getInfo(options, ogp) {
-  let name = '';
-  const urlParsed = url.parse(options.url);
-
-  if (ogp.hasOwnProperty('ogSiteName')) {
-    name = ogp.ogSiteName;
-  } else {
-    name = urlParsed.hostname;
-  }
-
-  const siteName = util.htmlTag('div', { class: 'hbc-site-name' }, escapeHTML(name));
-
-  let api = faviconAPI.replace('$DOMAIN', encodeURIComponent(urlParsed.hostname));
-  api = api.replace('$URL', encodeURIComponent(options.url));
-  const favicon = util.htmlTag('img', { class: 'hbc-favicon', src: api } , '');
-  return util.htmlTag('div', { class: 'hbc-info' }, favicon + siteName);
 }
 
 function getContents(options, ogp) {
@@ -123,7 +96,37 @@ function getContents(options, ogp) {
 
 function adjustLength(description) {
   if (description && description.length > descriptionLength) {
-    description = description.slice(0, descriptionLength) + '…';
+    description = description.slice(0, descriptionLength) + '窶ｦ';
   }
   return description;
+}
+function getDescription(options, ogp) {
+  if (ogp.hasOwnProperty('ogDescription')) {
+    const description = adjustLength(ogp.ogDescription);
+    text = util.htmlTag('p', { class: 'hbc-description bc-5' }, escapeHTML(description));
+    contents = util.htmlTag('div', { class: 'hbc-text bc-6' }, text);
+  }
+}
+function getTitle(options, ogp) {
+  const title = util.htmlTag('a', {class: 'bc-5', href: options.url, rel: options.rel }, escapeHTML(ogp.ogTitle);
+  return util.htmlTag('p', { style: 'margin:0;' }, title)
+}
+function getInfo(options, ogp) {
+  let name = '';
+  const urlParsed = url.parse(options.url);
+
+  if (ogp.hasOwnProperty('ogSiteName')) {
+    name = ogp.ogSiteName;
+  } else {
+    name = urlParsed.hostname;
+  }
+
+  const siteName = util.htmlTag('div', { class: 'hbc-site-name' }, escapeHTML(name));
+
+  let api = faviconAPI.replace('$DOMAIN', encodeURIComponent(urlParsed.hostname));
+  api = api.replace('$URL', encodeURIComponent(options.url));
+  const favicon = util.htmlTag('img', { class: 'hbc-favicon', src: api } , '');
+  const hatebu = util.htmlTag('img', { class: 'hbc-hatebu bc-hatebu', src: 'http://b.hatena.ne.jp/entry/image/' + encodeURIComponent(options.url)}, '');
+  const infoParagraph = util.htmlTag('p', {class: 'bc-8'}, favicon + siteName + hatebu )
+  return util.htmlTag('div', { class: 'hbc-info bc-7' }, infoParagraph);
 }
