@@ -46,71 +46,27 @@ function getTag(options) {
     return getTagByOpenGraph(options);
   }
 }
-
-function getTagByHatena(options) {
-  return new Promise((resolve) => {
-    resolve(`<iframe class="${className}" style="width: 100%; height: 155px; max-width: 500px;" src="https://hatenablog-parts.com/embed?url=${options.url}"></iframe>`);
-  })
+function getImage(options,ogp){
+const bc_4    = util.htmlTag('img', { class: "bc-4", src:ogp.ogImage.url},'');
+const bc_3    = util.htmlTag('a',   { class: "bc-3",href:options.url }, bc_4);
+return util.htmlTag('div', { class: "bc-2"},bc_3);
 }
 
-function getTagByOpenGraph(options){
-  return ogs(options)
-    .then(function (result) {
-      const ogp = result.data;
-
-      const info = getInfo(options, ogp);
-//      const contents = getContents(options, ogp);
-      const description = getDescription(options, ogp);
-      const card = util.htmlTag('div', { class: 'hbc-card' }, info + contents);
-      const link = util.htmlTag('a', { class: 'hbc-link', href: options.url, target: options.target, rel: options.rel }, card);
-      const linkWrap = util.htmlTag('div', { class: 'hbc-link-wrap bc' }, link);
-      const tag = util.htmlTag('div', { class: className }, linkWrap);
-      return tag;
-    })
-    .catch(function (error) {
-      console.log('error:', error);
-      return '';
-    });
-}
-
-function getContents(options, ogp) {
-  let contents = '';
-  let text = '';
-
-  text += util.htmlTag('div', { class: 'hbc-title' }, escapeHTML(ogp.ogTitle));
-  text += util.htmlTag('div', { class: 'hbc-url' }, options.url);
-
-  if (ogp.hasOwnProperty('ogDescription')) {
-    const description = adjustLength(ogp.ogDescription);
-    text += util.htmlTag('div', { class: 'hbc-description' }, escapeHTML(description));
-    contents = util.htmlTag('div', { class: 'hbc-text' }, text);
-  }
-
-  if (ogp.hasOwnProperty('ogImage')) {
-    const image = util.htmlTag('img', { src: ogp.ogImage.url } , '');
-    contents += util.htmlTag('div', { class: 'hbc-thumbnail' }, image);
-  }
-
-  return util.htmlTag('div', { class: 'hbc-contents' },  contents);
-}
-
-function adjustLength(description) {
-  if (description && description.length > descriptionLength) {
-    description = description.slice(0, descriptionLength) + '窶ｦ';
-  }
-  return description;
-}
-function getDescription(options, ogp) {
-  if (ogp.hasOwnProperty('ogDescription')) {
-    const description = adjustLength(ogp.ogDescription);
-    text = util.htmlTag('p', { class: 'hbc-description bc-5' }, escapeHTML(description));
-    contents = util.htmlTag('div', { class: 'hbc-text bc-6' }, text);
-  }
-}
 function getTitle(options, ogp) {
-  const title = util.htmlTag('a', {class: 'bc-5', href: options.url, rel: options.rel }, escapeHTML(ogp.ogTitle);
-  return util.htmlTag('p', { style: 'margin:0;' }, title)
+  const title = util.htmlTag('a', {class: 'bc-5', href: options.url, rel: options.rel }, escapeHTML(ogp.ogTitle));
+  return util.htmlTag('p', { style: 'margin:0;' }, title);
 }
+
+function getDescription(options, ogp) {
+if (ogp.hasOwnProperty('ogDescription')) {
+  const bc_6 = util.htmlTag('p',   { class: 'bc-6'},
+    escapeHTML(adjustLength(ogp.ogDescription))
+  );
+  return bc_6;
+}
+return '';
+}
+
 function getInfo(options, ogp) {
   let name = '';
   const urlParsed = url.parse(options.url);
@@ -125,8 +81,42 @@ function getInfo(options, ogp) {
 
   let api = faviconAPI.replace('$DOMAIN', encodeURIComponent(urlParsed.hostname));
   api = api.replace('$URL', encodeURIComponent(options.url));
-  const favicon = util.htmlTag('img', { class: 'hbc-favicon', src: api } , '');
-  const hatebu = util.htmlTag('img', { class: 'hbc-hatebu bc-hatebu', src: 'http://b.hatena.ne.jp/entry/image/' + encodeURIComponent(options.url)}, '');
-  const infoParagraph = util.htmlTag('p', {class: 'bc-8'}, favicon + siteName + hatebu )
-  return util.htmlTag('div', { class: 'hbc-info bc-7' }, infoParagraph);
+const bc_favicon=util.htmlTag('img', { class: 'hbc-favicon', src: api } , '');
+const bc_hatebu=util.htmlTag('img', {
+  class: 'hbc-hatebu bc-hatebu',
+  src: 'http://b.hatena.ne.jp/entry/image/' + encodeURIComponent(options.url)}, '');
+const bc_8=util.htmlTag('p', {class:'bc-8'},
+  bc_favicon + siteName + bc_hatebu
+);
+const bc_7=util.htmlTag('div', {class: 'bc-7'}, bc_8);
+return bc_7;
+}
+
+function getTagByOpenGraph(options){
+  return ogs(options)
+    .then(function (result) {
+      const ogp    = result.data;
+      const bc_2   = getImage(options,ogp);//Image
+      const title_p= getTitle(options, ogp);//title
+      const bc_6   =getDescription(options,ogp);
+      const bc_7   =getInfo(options,ogp);
+      return util.htmlTag('div',{class:'bc-1'}, bc_2+title_p+bc_6+bc_7);
+    })
+    .catch(function (error) {
+      console.log('error:', error);
+      return '';
+    });
+}
+function getTagByHatena(options) {
+  return new Promise((resolve) => {
+    resolve(`<iframe class="${className}" style="width: 100%; height: 155px; max-width: 500px;" src="https://hatenablog-parts.com/embed?url=${options.url}"></iframe>`);
+  })
+}
+
+
+function adjustLength(description) {
+  if (description && description.length > descriptionLength) {
+    description = description.slice(0, descriptionLength) + '…';
+  }
+  return description;
 }
