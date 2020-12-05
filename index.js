@@ -52,19 +52,27 @@ const bc_3    = util.htmlTag('a',   { class: "bc-3",href:options.url }, bc_4);
 return util.htmlTag('div', { class: "bc-2"},bc_3);
 }
 
-function getTitle(options, ogp) {
-  const title = util.htmlTag('a', {class: 'bc-5', href: options.url, rel: options.rel }, escapeHTML(ogp.ogTitle));
-  return util.htmlTag('p', { style: 'margin:0;' }, title);
-}
-
-function getDescription(options, ogp) {
-if (ogp.hasOwnProperty('ogDescription')) {
-  const bc_6 = util.htmlTag('p',   { class: 'bc-6'},
-    escapeHTML(adjustLength(ogp.ogDescription))
+function getMain(options, ogp) {
+    //return util.htmlTag('p', { style: 'margin:0;' }, title);
+  //if (ogp.hasOwnProperty('ogDescription')) {
+  //  const bc_6 = util.htmlTag('p',   { class: 'bc-6'},
+  //  escapeHTML(adjustLength(ogp.ogDescription))
+  //);
+  //return bc_6;
+  //}
+  //return '';
+  const title=util.htmlTag('div',{ class:'bcard-title' },
+    util.htmlTag('a',{
+      href: options.url,
+      rel: 'nofollow',
+      target: '_blank'
+    },escapeHTML(ogp.ogTitle))
   );
-  return bc_6;
-}
-return '';
+  const desc=util
+  return util.htmlTag('span',
+    {class: 'bcard-main'},
+    title
+  )
 }
 
 function getInfo(options, ogp) {
@@ -76,20 +84,29 @@ function getInfo(options, ogp) {
   } else {
     name = urlParsed.hostname;
   }
-
-  const siteName = util.htmlTag('div', { class: 'hbc-site-name' }, escapeHTML(name));
-
   let api = faviconAPI.replace('$DOMAIN', encodeURIComponent(urlParsed.hostname));
   api = api.replace('$URL', encodeURIComponent(options.url));
-const bc_favicon=util.htmlTag('img', { class: 'hbc-favicon', src: api } , '');
-const bc_hatebu=util.htmlTag('img', {
-  class: 'hbc-hatebu bc-hatebu',
-  src: 'http://b.hatena.ne.jp/entry/image/' + encodeURIComponent(options.url)}, '');
-const bc_8=util.htmlTag('p', {class:'bc-8'},
-  bc_favicon + siteName + bc_hatebu
-);
-const bc_7=util.htmlTag('div', {class: 'bc-7'}, bc_8);
-return bc_7;
+  const bcard_favicon=util.htmlTag(
+    'div', 
+    {
+      class: 'bcard-favicon',style:'background-image: url('+api+')'
+    } ,
+    '');
+  const bcard_site = util.htmlTag('div', 
+    {class:'bcard-favicon'},
+    util.htmlTag('a',{
+      href: options.url,
+      rel: 'nofollow',
+      target: '_blank'
+    },escapeHTML(name))
+  );
+  const bc_hatebu = util.htmlTag('img', {
+    class: 'hbc-hatebu bc-hatebu',
+    src: 'http://b.hatena.ne.jp/entry/image/' + encodeURIComponent(options.url)}, '');
+  return util.htmlTag('p', 
+    {class: 'bcard-header withgfav'},
+    bcard_favicon + bcard_site + bc_hatebu
+  );
 }
 
 function getTagByOpenGraph(options){
