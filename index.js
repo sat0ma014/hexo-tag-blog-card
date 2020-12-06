@@ -53,14 +53,12 @@ return util.htmlTag('div', { class: "bc-2"},bc_3);
 }
 
 function getMain(options, ogp) {
-    //return util.htmlTag('p', { style: 'margin:0;' }, title);
-  //if (ogp.hasOwnProperty('ogDescription')) {
-  //  const bc_6 = util.htmlTag('p',   { class: 'bc-6'},
-  //  escapeHTML(adjustLength(ogp.ogDescription))
-  //);
-  //return bc_6;
-  //}
-  //return '';
+  let img ='';
+  let imgFrag=''
+  if (ogp.hasOwnProperty('ogImage')) {
+    imgFrag='withogimg';
+    img=getImage(options, ogp);
+  }
   const title=util.htmlTag('div',{ class:'bcard-title' },
     util.htmlTag('a',{
       href: options.url,
@@ -68,11 +66,15 @@ function getMain(options, ogp) {
       target: '_blank'
     },escapeHTML(ogp.ogTitle))
   );
-  const desc=util
+  if (ogp.hasOwnProperty('ogDescription')) {
+  escapeHTML(adjustLength(ogp.ogDescription))
+  const desc=util.htmlTag('div',{class:'bcard-description'}, escapeHTML(adjustLength(ogp.ogDescription));
+
+<a href="https://www.cottpic.com/2019/02/windows-ubuntu-androidx86.html" rel="nofollow" target="_blank"><div class="bcard-img" style="background-image: url(https://3.bp.blogspot.com/-xhNE9RQZAD4/XFKp1TpI2uI/AAAAAAAAA90/7so6oQ4wE_k5kWoBk_8UycgKKbp94Ri-wCLcBGAs/s1600/ubuntu_p1.png)"></div></a>
+
   return util.htmlTag('span',
-    {class: 'bcard-main'},
-    title
-  )
+    {class: 'bcard-main '+imgFrag},
+    title+desc+img)
 }
 
 function getInfo(options, ogp) {
@@ -113,11 +115,9 @@ function getTagByOpenGraph(options){
   return ogs(options)
     .then(function (result) {
       const ogp    = result.data;
-      const bc_2   = getImage(options,ogp);//Image
-      const title_p= getTitle(options, ogp);//title
       const bc_6   =getDescription(options,ogp);
       const bc_7   =getInfo(options,ogp);
-      return util.htmlTag('div',{class:'bc-1'}, bc_2+title_p+bc_6+bc_7);
+      return util.htmlTag('div',{class:'bc-1 bcard-wrapper'}, bc_7+bc_6+);
     })
     .catch(function (error) {
       console.log('error:', error);
